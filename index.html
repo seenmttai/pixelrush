@@ -150,13 +150,18 @@
     <div id="instructions">
         <h2>Ship Systems</h2>
         <ul>
-            <li><strong>Click</strong> to take control.</li>
-            <li><strong>Mouse</strong> - Aim ship</li>
-            <li><strong>W/S</strong> - Fwd/Retro Thrust</li>
-            <li><strong>Q/E</strong> - Roll Left/Right</li>
-            <li><strong>Z</strong> - Kill Thrust</li>
-            <li><strong>+/-</strong> - Time Compression</li>
-            <li><strong>ESC</strong> - Release mouse</li>
+            <li><strong>MISSION:</strong> The main goal is to reach Neptune. You Will Be Spawned Over Earth,</li>
+            <li>Warning ⚠️: Astroids may hit you.</li>
+            <li style="color: #bbb;">Avoid collisions with celestial bodies and asteroids.</li>
+            <hr style="border-color: rgba(76, 175, 80, 0.5);">
+            <li><strong>Mouse:</strong> Steer Ship</li>
+            <li><strong>W / S:</strong> Forward / Backward Thrust</li>
+            <li><strong>Q / E:</strong> Roll Left / Right</li>
+            <li><strong>Z:</strong> Cut Engines (All Stop)</li>
+            <li><strong>X:</strong> Toggle Flight Assist</li>
+            <li><strong>+ / -:</strong> Adjust Time Warp</li>
+            <li><strong>Double-Click Body:</strong> Set Target</li>
+            <li><strong>Click Screen:</strong> Enter Pilot Mode</li>
         </ul>
     </div>
 
@@ -173,7 +178,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Lensflare.js"></script>
-    
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const loadingText = document.getElementById('loading-text');
@@ -199,7 +204,7 @@
                 }
             }
         }
-        
+
         typeWriter();
 
         let sun, sunMaterial, composer, godraysPass;
@@ -225,7 +230,7 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        const ship = { velocity: new THREE.Vector3(0, 0, 0), thrust: 0, acceleration: 10000, rollSpeed: 1.5, flightAssist: true, mouseSensitivity: 0.002, enginesActive: false };
+        const ship = { velocity: new THREE.Vector3(0, 0, 0), thrust: 0, acceleration: 1000, rollSpeed: 1.5, flightAssist: true, mouseSensitivity: 0.002, enginesActive: false };
         const keyboard = {};
         let timeScale = 1.0;
         const timeScales = [1, 10, 100, 1000, 10000, 100000];
@@ -235,14 +240,14 @@
         const instructionsPanel = document.getElementById('instructions');
         const velocityDisplay = document.getElementById('velocity-display');
         const accelInput = document.getElementById('accel-input');
-        
+
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
         scene.add(ambientLight);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
         directionalLight.position.set(1, 0, 0);
         directionalLight.castShadow = true;
         scene.add(directionalLight);
-        
+
         const planetData = [ { name: 'Mercury', radius: 3.5, texture: 'https://d3amity.pages.dev/2k_mercury.jpg', distance: 200, rotationSpeed: 0.001, mass: 10 }, { name: 'Venus', radius: 8.5, texture: 'https://d3amity.pages.dev/2k_venus_atmosphere.jpg', distance: 350, rotationSpeed: 0.0008, mass: 80 }, { name: 'Earth', radius: 9, texture: 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg', distance: 500, rotationSpeed: 0.01, special: 'earth', mass: 100 }, { name: 'Mars', radius: 5, texture: 'https://d3amity.pages.dev/2k_mars.jpg', distance: 750, rotationSpeed: 0.009, mass: 20 }, { name: 'Jupiter', radius: 40, texture: 'https://d3amity.pages.dev/2k_jupiter.jpg', distance: 1800, rotationSpeed: 0.025, mass: 1000 }, { name: 'Saturn', radius: 35, texture: 'https://d3amity.pages.dev/2k_saturn.jpg', distance: 3000, rotationSpeed: 0.02, special: 'saturn', mass: 850 }, { name: 'Uranus', radius: 20, texture: 'https://d3amity.pages.dev/2k_uranus.jpg', distance: 4500, rotationSpeed: 0.015, mass: 400 }, { name: 'Neptune', radius: 19, texture: 'https://d3amity.pages.dev/2k_neptune.jpg', distance: 6000, rotationSpeed: 0.014, mass: 450 } ];
 
         function createProceduralSpaceship() {
@@ -262,7 +267,7 @@
             updateCamera(true);
             isSimRunning = true;
         }
-        
+
         function gameOver() {
             if (isGameOver) return;
             isGameOver = true;
@@ -271,7 +276,7 @@
             overlay.style.display = 'flex';
             overlay.addEventListener('click', () => { location.reload(); });
         }
-        
+
         accelInput.addEventListener('change', () => { ship.acceleration = parseFloat(accelInput.value) || 1000; });
         renderer.domElement.addEventListener('click', (e) => { if (e.target.className !== 'hud-input' && !isGameOver) { renderer.domElement.requestPointerLock(); instructionsPanel.classList.add('hidden'); } });
         document.addEventListener('pointerlockchange', () => {});
@@ -282,17 +287,17 @@
         function onDoubleClick(event) { if (document.pointerLockElement === renderer.domElement) return; mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; raycaster.setFromCamera(mouse, camera); const intersects = raycaster.intersectObjects(allMassiveBodies); if (intersects.length > 0 && intersects[0].object.userData.name) { setTarget(intersects[0].object); } }
         function setTarget(object) { targetObject = object; document.querySelectorAll('#target-list li').forEach(li => { li.classList.remove('active'); if (li.textContent === targetObject.userData.name) { li.classList.add('active'); } }); }
         function buildTargetList() { const menu = document.getElementById('target-list'); allMassiveBodies.forEach(body => { const item = document.createElement('li'); item.textContent = body.userData.name; item.addEventListener('click', () => { setTarget(body); }); menu.appendChild(item); }); }
-        
+
         const totalAcceleration = new THREE.Vector3();
         const GRAVITATIONAL_CONSTANT = 0.05;
         const PHYSICS_SCALE_FACTOR = 0.001;
         const screenShake = { intensity: 0, duration: 0 };
 
         function handleControls(deltaTime) { if (keyboard['KeyW'] || keyboard['KeyS']) { ship.enginesActive = true; } if (ship.enginesActive) { if (keyboard['KeyW']) ship.thrust = ship.acceleration; else if (keyboard['KeyS']) ship.thrust = -ship.acceleration; else ship.thrust = 0; } else { ship.thrust = 0; } if (keyboard['KeyZ']) ship.thrust = 0; if (ship.enginesActive && spaceshipMesh) { let roll = 0; if (keyboard['KeyQ']) roll = ship.rollSpeed * deltaTime; if (keyboard['KeyE']) roll = -ship.rollSpeed * deltaTime; spaceshipMesh.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1).applyQuaternion(spaceshipMesh.quaternion), roll); } if (keyboard['KeyX'] === true) { ship.flightAssist = !ship.flightAssist; keyboard['KeyX'] = 'processed'; hud.faStatus.textContent = ship.flightAssist ? "ON" : "OFF"; } if (keyboard['Equal'] || keyboard['NumpadAdd']) { timeScaleIndex = Math.min(timeScaleIndex + 1, timeScales.length - 1); keyboard['Equal'] = keyboard['NumpadAdd'] = 'processed'; } if (keyboard['Minus'] || keyboard['NumpadSubtract']) { timeScaleIndex = Math.max(timeScaleIndex - 1, 0); keyboard['Minus'] = keyboard['NumpadSubtract'] = 'processed'; } timeScale = timeScales[timeScaleIndex]; }
-        
+
         function updatePhysics(effectiveDeltaTime) {
             if (!spaceshipMesh) return;
-            
+
             for (const body of allMassiveBodies) {
                 const bodyWorldPos = new THREE.Vector3();
                 body.getWorldPosition(bodyWorldPos);
@@ -325,38 +330,38 @@
             }
 
             if (!ship.enginesActive) { totalAcceleration.set(0, 0, 0); return; }
-            
+
             totalAcceleration.set(0, 0, 0);
             const gravityForce = new THREE.Vector3();
             allMassiveBodies.forEach(body => { const bodyWorldPos = new THREE.Vector3(); body.getWorldPosition(bodyWorldPos); const vecToShip = new THREE.Vector3().subVectors(bodyWorldPos, spaceshipMesh.position); const distanceSq = vecToShip.lengthSq(); if (distanceSq > (body.geometry.parameters.radius**2)) { const forceMagnitude = GRAVITATIONAL_CONSTANT * body.userData.mass / distanceSq; vecToShip.normalize().multiplyScalar(forceMagnitude); gravityForce.add(vecToShip); } });
             totalAcceleration.add(gravityForce);
-            
+
             const scaledThrust = ship.thrust * PHYSICS_SCALE_FACTOR;
             const thrustForce = new THREE.Vector3(0, 0, -1).applyQuaternion(spaceshipMesh.quaternion).multiplyScalar(scaledThrust);
             totalAcceleration.add(thrustForce);
-            
+
             ship.velocity.add(totalAcceleration.clone().multiplyScalar(effectiveDeltaTime));
             spaceshipMesh.position.add(ship.velocity.clone().multiplyScalar(effectiveDeltaTime));
         }
-        
+
         const cameraOffset = new THREE.Vector3(0, 2, 10);
         function updateCamera(instant = false) { if (!spaceshipMesh) return; const offset = cameraOffset.clone().applyQuaternion(spaceshipMesh.quaternion); const desiredCamPos = spaceshipMesh.position.clone().add(offset); if (instant) { camera.position.copy(desiredCamPos); } else { camera.position.lerp(desiredCamPos, 0.1); } camera.lookAt(spaceshipMesh.position); }
-        
+
         function updateHUD(){ velocityDisplay.value = (ship.velocity.length() / PHYSICS_SCALE_FACTOR).toFixed(2); hud.gForce.textContent = (Math.abs(ship.thrust) / 9.8).toFixed(2); hud.timeScale.textContent=`${timeScale}x`; if(targetObject && spaceshipMesh){ const targetWorldPos=new THREE.Vector3; targetObject.getWorldPosition(targetWorldPos); const distance=spaceshipMesh.position.distanceTo(targetWorldPos); const gravityAtShip=GRAVITATIONAL_CONSTANT*targetObject.userData.mass/(distance*distance)/9.8; hud.targetName.textContent=targetObject.userData.name; hud.targetDistance.textContent=distance.toFixed(0); hud.targetRelVel.textContent=0; hud.targetGravity.textContent=gravityAtShip.toFixed(3)+" G"; } else { hud.targetName.textContent="NONE"; hud.targetDistance.textContent="--"; hud.targetRelVel.textContent="--"; hud.targetGravity.textContent="--"; } if(spaceshipMesh){ const velocityScreenPos=spaceshipMesh.position.clone().add(ship.velocity); velocityScreenPos.project(camera); if(velocityScreenPos.z<1){ hud.velocityVector.style.display="block"; hud.velocityVector.style.left=`${.5*(velocityScreenPos.x+1)*window.innerWidth}px`; hud.velocityVector.style.top=`${.5*(-velocityScreenPos.y+1)*window.innerHeight}px`; } else { hud.velocityVector.style.display="none"; } } }
-        
+
         function animate() { requestAnimationFrame(animate); if(isGameOver){ composer.render(); return; } const deltaTime = Math.min(clock.getDelta(), 0.1); if (isSimRunning) { const effectiveDeltaTime = deltaTime * timeScale; Object.keys(keyboard).forEach(key => { if (keyboard[key] === 'processed') keyboard[key] = false; }); handleControls(deltaTime); updatePhysics(effectiveDeltaTime); updateCamera(); updateHUD(); if (screenShake.duration > 0) { camera.position.x += (Math.random() - 0.5) * screenShake.intensity; camera.position.y += (Math.random() - 0.5) * screenShake.intensity; screenShake.duration -= deltaTime; if (screenShake.duration <= 0) screenShake.intensity = 0; } const elapsedTime = clock.getElapsedTime(); if (sunMaterial) sunMaterial.uniforms.u_time.value = elapsedTime * 0.05; if (sun) sun.rotation.y += 0.0002 * effectiveDeltaTime; if (milkyWay) milkyWay.rotation.z += 0.00002 * effectiveDeltaTime; planets.forEach(p => { p.orbit.rotation.y += p.orbitSpeed * effectiveDeltaTime; p.mesh.rotation.y += p.rotationSpeed * effectiveDeltaTime; }); } if (godraysPass) { const lightPos = new THREE.Vector3(); sun.getWorldPosition(lightPos); lightPos.project(camera); godraysPass.uniforms.vLightPositionScreen.value.x = (lightPos.x + 1) * 0.5; godraysPass.uniforms.vLightPositionScreen.value.y = (lightPos.y + 1) * 0.5; } composer.render(); }
-        
-        function init() { camera.position.set(500, 200, 1000); camera.lookAt(0, 0, 0); createSun(); planetData.forEach(createPlanet); createDeepSpace(); createAsteroidBelt(); setupPostProcessing(); buildTargetList(); createProceduralSpaceship(); setTarget(planets.find(p => p.name === 'Earth').mesh); window.addEventListener('resize', onWindowResize); window.addEventListener('dblclick', onDoubleClick); window.addEventListener('keydown', onKeyDown); window.addEventListener('keyup', onKeyUp); window.addEventListener('mousemove', onMouseMove); animate(); }
+
+        function init() { camera.position.set(500, 200, 1000); camera.lookAt(0, 0, 0); createSun(); planetData.forEach(createPlanet); createDeepSpace(); createAsteroidBelt(3000, 900, 1600, 100); createAsteroidBelt(4000, 6500, 9000, 200); setupPostProcessing(); buildTargetList(); createProceduralSpaceship(); setTarget(planets.find(p => p.name === 'Earth').mesh); window.addEventListener('resize', onWindowResize); window.addEventListener('dblclick', onDoubleClick); window.addEventListener('keydown', onKeyDown); window.addEventListener('keyup', onKeyUp); window.addEventListener('mousemove', onMouseMove); animate(); }
         function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight); }
 
         function createSun(){sunMaterial=new THREE.ShaderMaterial({uniforms:{u_time:{value:0},u_texture:{value:textureLoader.load("https://d3amity.pages.dev/8k_sun.jpg")}},vertexShader:"varying vec2 vUv;varying vec3 vNormal;void main(){vUv=uv;vNormal=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",fragmentShader:"uniform float u_time;uniform sampler2D u_texture;varying vec2 vUv;varying vec3 vNormal;vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}vec2 mod289(vec2 x){return x-floor(x*(1./289.))*289.;}vec3 permute(vec3 x){return mod289(((x*34.)+1.)*x);}float snoise(vec2 v){const vec4 C=vec4(.211324865405187,.366025403784439,-.577350269189626,.024390243902439);vec2 i=floor(v+dot(v,C.yy)),x0=v-i+dot(i,C.xx);vec2 i1=(x0.x>x0.y)?vec2(1.,0.):vec2(0.,1.);vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod289(i);vec3 p=permute(permute(i.y+vec3(0.,i1.y,1.))+i.x+vec3(0.,i1.x,1.));vec3 m=max(.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.);m=m*m;m=m*m;vec3 x=2.*fract(p*C.www)-1.;vec3 h=abs(x)-.5;vec3 ox=floor(x+.5);vec3 a0=x-ox;m*=1.79284291400159-.85373472095314*(a0*a0+h*h);vec3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;return 130.*dot(m,g);}float fbm(vec2 st){float v=.0;float a=.5;for(int i=0;i<5;i++){v+=a*snoise(st);st*=2.;a*=.5;}return v;}void main(){vec3 baseColor=texture2D(u_texture,vUv).rgb;vec2 motionUv=vUv*4.;motionUv.x+=u_time*.1;float turbulence=fbm(motionUv+u_time*.2);vec3 turbulentColor=mix(baseColor,vec3(1.8,.8,.2),pow(turbulence,2.)*.3);vec2 eruptionUv=vUv*2.;eruptionUv.y-=u_time*.08;float eruptionNoise=fbm(eruptionUv-u_time*.04);eruptionNoise=pow(abs(eruptionNoise),8.);vec3 eruptionColor=vec3(2.5,1.7,1.)*eruptionNoise*1.5;float edge=1.-vNormal.z;float corona=fbm(vUv*3.+u_time*.1)*pow(edge,3.)*0.6;vec3 coronaColor=vec3(1.6,.7,.2)*corona;vec3 finalColor=turbulentColor+eruptionColor+coronaColor;finalColor*=vec3(1.1,.8,.5);gl_FragColor=vec4(finalColor,1.);}"});sun=new THREE.Mesh(new THREE.SphereGeometry(100,128,128),sunMaterial);sun.userData={name:"Sun",mass:2e4};scene.add(sun);allMassiveBodies.push(sun);const sunEffectsLight=new THREE.PointLight(16777215,2,0,2);sun.add(sunEffectsLight);const flareTexture=textureLoader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png");const lensflare=new THREE.Lensflare;lensflare.addElement(new THREE.LensflareElement(flareTexture,600,0,sunEffectsLight.color));sunEffectsLight.add(lensflare)};
         function createPlanet(data){const orbit=new THREE.Object3D;scene.add(orbit);const isOuterPlanet=["Jupiter","Saturn","Uranus","Neptune"].includes(data.name);let material;isOuterPlanet?material=new THREE.MeshStandardMaterial({map:textureLoader.load(data.texture),roughness:.9,metalness:.1}):material=new THREE.MeshPhongMaterial({map:textureLoader.load(data.texture),shininess:10});const planetMesh=new THREE.Mesh(new THREE.SphereGeometry(data.radius,64,64),material);planetMesh.castShadow=!0;planetMesh.receiveShadow=!0;planetMesh.position.set(data.distance,0,0);planetMesh.userData={name:data.name,mass:data.mass,velocity:new THREE.Vector3,lastWorldPosition:new THREE.Vector3};orbit.add(planetMesh);allMassiveBodies.push(planetMesh);if("earth"===data.special){planetMesh.material.specularMap=textureLoader.load("https://threejs.org/examples/textures/planets/earth_specular_2048.jpg");planetMesh.material.normalMap=textureLoader.load("https://threejs.org/examples/textures/planets/earth_normal_2048.jpg");planetMesh.material.emissiveMap=textureLoader.load("https://threejs.org/examples/textures/planets/earth_lights_2048.png");planetMesh.material.emissive=new THREE.Color(16777198);planetMesh.material.emissiveIntensity=1;const atmosphereMaterial=new THREE.ShaderMaterial({uniforms:{c:{value:.5},p:{value:4},glowColor:{value:new THREE.Color(9128683)},viewVector:{value:new THREE.Vector3}},vertexShader:"uniform vec3 viewVector; uniform float c; uniform float p; varying float intensity; void main(){ vec3 vNormal = normalize(normalMatrix * normal); vec3 vNormel = normalize(normalMatrix * viewVector); intensity = pow(c - dot(vNormal, vNormel), p); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",fragmentShader:"uniform vec3 glowColor;varying float intensity;void main(){vec3 glow=glowColor*intensity;gl_FragColor=vec4(glow,1.);}",side:THREE.BackSide,blending:THREE.AdditiveBlending,transparent:!0});const atmosphere=new THREE.Mesh(new THREE.SphereGeometry(data.radius*1.03,64,64),atmosphereMaterial);planetMesh.add(atmosphere);planetMesh.userData.atmosphere=atmosphere}else if("saturn"===data.special){const ringMaterial=new THREE.MeshStandardMaterial({map:textureLoader.load("https://d3amity.pages.dev/2k_saturn_ring_alpha.png"),side:THREE.DoubleSide,transparent:!0,opacity:.8,roughness:.9,metalness:.1});const ringMesh=new THREE.Mesh(new THREE.RingGeometry(data.radius*1.2,data.radius*2.2,128),ringMaterial);ringMesh.receiveShadow=!0;ringMesh.rotation.x=Math.PI/2;planetMesh.add(ringMesh);planetMesh.rotation.x=.47}const orbitalVelocity=Math.sqrt(GRAVITATIONAL_CONSTANT*sun.userData.mass/data.distance);data.orbitSpeed=orbitalVelocity/data.distance;planets.push({mesh:planetMesh,orbit:orbit,...data})};
         function createDeepSpace(){const createStarTexture=()=>{const canvas=document.createElement("canvas");canvas.width=64,canvas.height=64;const ctx=canvas.getContext("2d"),gradient=ctx.createRadialGradient(32,32,0,32,32,32);return gradient.addColorStop(0,"rgba(255,255,255,1)"),gradient.addColorStop(.2,"rgba(255,255,255,0.8)"),gradient.addColorStop(1,"rgba(255,255,255,0)"),ctx.fillStyle=gradient,ctx.fillRect(0,0,64,64),new THREE.CanvasTexture(canvas)},starTexture=createStarTexture(),starVertices=[],starSizes=[],starColors=[],starColor=new THREE.Color;for(let i=0;i<8e4;i++){const x=THREE.MathUtils.randFloatSpread(9e4),y=THREE.MathUtils.randFloatSpread(9e4),z=THREE.MathUtils.randFloatSpread(9e4);starVertices.push(x,y,z),starSizes.push(THREE.MathUtils.randFloat(15,50)),starColor.setHSL(THREE.MathUtils.randFloat(.55,.7),.1,THREE.MathUtils.randFloat(.6,1)),starColors.push(starColor.r,starColor.g,starColor.b)}const starGeometry=new THREE.BufferGeometry;starGeometry.setAttribute("position",new THREE.Float32BufferAttribute(starVertices,3)),starGeometry.setAttribute("size",new THREE.Float32BufferAttribute(starSizes,1)),starGeometry.setAttribute("color",new THREE.Float32BufferAttribute(starColors,3));const starMaterial=new THREE.ShaderMaterial({uniforms:{pointTexture:{value:starTexture}},vertexShader:"varying vec3 vColor; void main() { vColor = color; vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 ); gl_PointSize = size * ( 300.0 / -mvPosition.z ); gl_Position = projectionMatrix * mvPosition; }",fragmentShader:"uniform sampler2D pointTexture; varying vec3 vColor; void main() { gl_FragColor = vec4( vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord ); }",blending:THREE.AdditiveBlending,depthTest:!0,depthWrite:!1,transparent:!0,vertexColors:!0});scene.add(new THREE.Points(starGeometry,starMaterial));const milkyWayTexture=textureLoader.load("https://d3amity.pages.dev/eso0932a.tif"),milkyWayMaterial=new THREE.MeshBasicMaterial({map:milkyWayTexture,side:THREE.BackSide,transparent:!0,opacity:.3,depthWrite:!1});milkyWay=new THREE.Mesh(new THREE.PlaneGeometry(8e4,8e4),milkyWayMaterial),milkyWay.rotation.x=Math.PI/2,milkyWay.rotation.y=Math.PI,scene.add(milkyWay)};
-        function createAsteroidBelt(){const geoms=[new THREE.DodecahedronGeometry(1,0),new THREE.IcosahedronGeometry(1,0)];for(let i=0;i<1500;i++){const material=new THREE.MeshStandardMaterial({color:(new THREE.Color).setHSL(.1,.1,THREE.MathUtils.randFloat(.1,.4)),roughness:.8,metalness:.5}),mesh=new THREE.Mesh(geoms[Math.floor(Math.random()*geoms.length)],material),angle=2*Math.random()*Math.PI,radius=THREE.MathUtils.randFloat(950,1300);mesh.position.set(Math.cos(angle)*radius,THREE.MathUtils.randFloatSpread(50),Math.sin(angle)*radius),mesh.scale.setScalar(THREE.MathUtils.randFloat(1,5)),mesh.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);const velocity=new THREE.Vector3().subVectors(sun.position,mesh.position).normalize().multiplyScalar(THREE.MathUtils.randFloat(5,15));asteroids.push({mesh:mesh,velocity:velocity}),scene.add(mesh)}};
+        function createAsteroidBelt(count, minRadius, maxRadius, ySpread){const geoms=[new THREE.DodecahedronGeometry(1,0),new THREE.IcosahedronGeometry(1,0)];for(let i=0;i<count;i++){const material=new THREE.MeshStandardMaterial({color:(new THREE.Color).setHSL(.1,.1,THREE.MathUtils.randFloat(.1,.4)),roughness:.8,metalness:.5}),mesh=new THREE.Mesh(geoms[Math.floor(Math.random()*geoms.length)],material),angle=2*Math.random()*Math.PI,radius=THREE.MathUtils.randFloat(minRadius,maxRadius);mesh.position.set(Math.cos(angle)*radius,THREE.MathUtils.randFloatSpread(ySpread),Math.sin(angle)*radius),mesh.scale.setScalar(THREE.MathUtils.randFloat(1,5)),mesh.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);const velocity=new THREE.Vector3().subVectors(sun.position,mesh.position).normalize().multiplyScalar(THREE.MathUtils.randFloat(5,15));asteroids.push({mesh:mesh,velocity:velocity}),scene.add(mesh)}};
         function setupPostProcessing(){const godRaysShader={uniforms:{tDiffuse:{value:null},fExposure:{value:.08},fDecay:{value:.98},fDensity:{value:.96},fWeight:{value:.3},vLightPositionScreen:{value:new THREE.Vector2(.5,.5)}},vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}",fragmentShader:"varying vec2 vUv;uniform sampler2D tDiffuse;uniform float fExposure,fDecay,fDensity,fWeight;uniform vec2 vLightPositionScreen;const int iSamples=60;void main(){vec2 delta=vUv-vLightPositionScreen;delta*=1./float(iSamples)*fDensity;float illuminationDecay=1.;vec4 godRaysColor=vec4(0.);for(int i=0;i<iSamples;i++){vec2 sampleCoord=vUv-delta*float(i);vec4 texel=texture2D(tDiffuse,sampleCoord);float brightness=dot(texel.rgb,vec3(.299,.587,.114));texel*=smoothstep(.5,1.,brightness);texel*=illuminationDecay*fWeight;godRaysColor+=texel;illuminationDecay*=fDecay;}godRaysColor*=fExposure;vec4 originalColor=texture2D(tDiffuse,vUv);gl_FragColor=originalColor+godRaysColor;}"};composer=new THREE.EffectComposer(renderer);composer.addPass(new THREE.RenderPass(scene,camera));godraysPass=new THREE.ShaderPass(godRaysShader);godraysPass.renderToScreen=!0;composer.addPass(godraysPass)};
 
         init();
-        
+
         setTimeout(() => {
             const loader = document.getElementById('loader');
             loader.style.opacity = '0';
